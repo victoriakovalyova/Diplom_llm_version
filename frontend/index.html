@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>OCR+LLM Pipeline | Метрические книги</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">📖</span>
+                <h1>Metrica<br><span>OCR + LLM Pipeline</span></h1>
+            </div>
+            <p class="subtitle">Распознавание метрических книг Российской империи</p>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <div class="upload-card">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/tiff,image/bmp" hidden>
+                    <div class="upload-placeholder">
+                        <div class="upload-icon">🖼️</div>
+                        <p>Нажмите или перетащите изображение</p>
+                        <small>JPEG, PNG, TIFF, BMP</small>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview" style="display: none;">
+                        <img id="previewImg" alt="Preview">
+                        <button class="remove-btn" id="removeFileBtn">✕</button>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="processBtn" disabled>✨ Начать распознавание</button>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Обработка изображения...</p>
+                <div class="steps">
+                    <span id="step1" class="step">1️⃣ Сегментация</span>
+                    <span id="step2" class="step">2️⃣ OCR</span>
+                    <span id="step3" class="step">3️⃣ LLM коррекция</span>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" style="display: none;">
+                <!-- Carousel Navigation -->
+                <div class="carousel-nav">
+                    <button class="carousel-btn prev" id="prevBtn" disabled>‹</button>
+                    <div class="carousel-indicators" id="indicators">
+                        <span class="indicator active" data-slide="0">📷 Исходник</span>
+                        <span class="indicator" data-slide="1">🔲 Сегментация</span>
+                        <span class="indicator" data-slide="2">📊 Результаты</span>
+                    </div>
+                    <button class="carousel-btn next" id="nextBtn">›</button>
+                </div>
+
+                <!-- Slides -->
+                <div class="slides-container">
+                    <!-- Slide 0: Original Image -->
+                    <div class="slide" id="slide0">
+                        <div class="image-viewer">
+                            <div class="image-container" id="originalImageContainer">
+                                <img id="originalImage" alt="Original image">
+                            </div>
+                            <div class="image-controls">
+                                <button class="zoom-btn" id="zoomOut0">−</button>
+                                <span class="zoom-level" id="zoomLevel0">100%</span>
+                                <button class="zoom-btn" id="zoomIn0">+</button>
+                                <button class="reset-btn" id="resetZoom0">⟳ Сброс</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 1: Segmented Image -->
+                    <div class="slide" id="slide1">
+                        <div class="image-viewer">
+                            <div class="image-container" id="segmentedImageContainer">
+                                <img id="segmentedImage" alt="Segmented image">
+                            </div>
+                            <div class="image-controls">
+                                <button class="zoom-btn" id="zoomOut1">−</button>
+                                <span class="zoom-level" id="zoomLevel1">100%</span>
+                                <button class="zoom-btn" id="zoomIn1">+</button>
+                                <button class="reset-btn" id="resetZoom1">⟳ Сброс</button>
+                            </div>
+                        </div>
+                        <div class="cells-info">
+                            <p>📊 <span id="cellsCount">0</span> ячеек выделено</p>
+                        </div>
+                    </div>
+
+                    <!-- Slide 2: Results Table -->
+                    <div class="slide" id="slide2">
+                        <div class="metrics-card">
+                            <h3>📈 Метрика точности</h3>
+                            <div class="metrics-container">
+                                <div class="metric">
+                                    <span class="metric-label">CER (символьная ошибка)</span>
+                                    <span class="metric-value" id="cerValue">—</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Точность распознавания</span>
+                                    <span class="metric-value" id="accuracyValue">—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="results-card">
+                            <h3>📋 Результаты распознавания</h3>
+                            <div class="table-wrapper">
+                                <table id="resultsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Ячейка</th>
+                                            <th>OCR результат</th>
+                                            <th>LLM коррекция</th>
+                                            <th>Статус</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="export-card">
+                            <h3>📄 Экспорт данных</h3>
+                            <div class="export-buttons">
+                                <button class="btn btn-secondary" id="downloadOcrJson">⬇️ Скачать OCR JSON</button>
+                                <button class="btn btn-secondary" id="downloadLlmJson">⬇️ Скачать LLM JSON</button>
+                                <button class="btn btn-secondary" id="downloadFullJson">⬇️ Скачать полный JSON</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
