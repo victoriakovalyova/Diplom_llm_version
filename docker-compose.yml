@@ -1,0 +1,63 @@
+services:
+  ocr_service:
+    build: ./manuscript-ocr
+    container_name: ocr_container
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - pipeline_network
+
+  llm_service:
+    build: ./llm_service
+    container_name: llm_container
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./llm_service/.env
+    restart: unless-stopped
+    networks:
+      - pipeline_network
+
+  segment_service:
+    build: ./segment_service
+    container_name: segment_container
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./input:/app/input
+      - ./output:/app/output
+    restart: unless-stopped
+    networks:
+      - pipeline_network
+
+  orchestrator_service:
+    build: ./orchestrator_service
+    container_name: orchestrator_container
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./input:/app/input
+      - ./output:/app/output
+    depends_on:
+      - ocr_service
+      - llm_service
+      - segment_service
+    restart: unless-stopped
+    networks:
+      - pipeline_network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend_container
+    ports:
+      - "8080:80"
+    depends_on:
+      - orchestrator_service
+    restart: unless-stopped
+    networks:
+      - pipeline_network
+
+networks:
+  pipeline_network:
+    driver: bridge
